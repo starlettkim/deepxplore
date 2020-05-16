@@ -19,7 +19,7 @@ from utils import *
 # read the parameter
 # argument parsing
 parser = argparse.ArgumentParser(description='Main function for difference-inducing input generation in MNIST dataset')
-parser.add_argument('transformation', help="realistic transformation type", choices=['light', 'occl', 'blackout'])
+parser.add_argument('transformation', help="realistic transformation type", choices=['light', 'occl', 'blackout', 'adjacent'])
 parser.add_argument('weight_diff', help="weight hyperparm to control differential behavior", type=float)
 parser.add_argument('weight_nc', help="weight hyperparm to control neuron coverage", type=float)
 parser.add_argument('step', help="step size of gradient descent", type=float)
@@ -134,6 +134,8 @@ for _ in xrange(args.seeds):
                                           args.occlusion_size)  # constraint the gradients value
         elif args.transformation == 'blackout':
             grads_value = constraint_black(grads_value)  # constraint the gradients value
+        elif args.transformation == 'adjacent':
+            grads_value = constraint_adj(grads_value, gen_img)  # constraint the gradients value
 
         gen_img += grads_value * args.step
         predictions1 = np.argmax(model1.predict(gen_img)[0])

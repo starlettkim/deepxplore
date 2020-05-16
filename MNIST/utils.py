@@ -43,6 +43,32 @@ def constraint_black(gradients, rect_shape=(6, 6)):
     return new_grads
 
 
+def constraint_adj(gradients, img):
+    new_mask = ori_mask = img > .5  # mask bright pixels
+
+    # shift mask down
+    shifted_mask = np.roll(ori_mask, 1, 1)
+    shifted_mask[:,0] = 0
+    new_mask += shifted_mask
+
+    # shift mask up
+    shifted_mask = np.roll(ori_mask, -1, 1)
+    shifted_mask[:,-1] = 0
+    new_mask += shifted_mask
+
+    # shift mask right
+    shifted_mask = np.roll(ori_mask, 1, 2)
+    shifted_mask[:,:,0] = 0
+    new_mask += shifted_mask
+
+    # shift mask left
+    shifted_mask = np.roll(ori_mask, -1, 2)
+    shifted_mask[:,:,-1] = 0
+    new_mask += shifted_mask
+
+    return gradients * shifted_mask
+
+
 def init_coverage_tables(model1, model2, model3):
     model_layer_dict1 = defaultdict(bool)
     model_layer_dict2 = defaultdict(bool)
