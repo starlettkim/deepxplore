@@ -126,7 +126,7 @@ for _ in xrange(args.seeds):
     iterate = K.function([input_tensor], [loss1, loss2, loss3, loss1_neuron, loss2_neuron, loss3_neuron, grads])
 
     if args.transformation == 'rgb':
-        constraint_rgb.prev_ch = -1
+        constraint_rgb.channel = -1
 
     # we run gradient ascent for 20 steps
     for iters in xrange(args.grad_iterations):
@@ -162,6 +162,13 @@ for _ in xrange(args.seeds):
                 neuron_covered(model_layer_dict3)[
                     1])
             print(bcolors.OKGREEN + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
+            if args.transformation == 'rgb':
+                orig_mean = np.mean(orig_img, (0, 1, 2))[constraint_rgb.channel]
+                gen_mean = np.mean(gen_img, (0, 1, 2))[constraint_rgb.channel]
+                print(bcolors.OKGREEN + 'changed ' + ['red', 'green', 'blue'][constraint_rgb.channel] +
+                      ' for ' + str((gen_mean - orig_mean) / orig_mean * 100) + '%')
+            print(args.transformation + '_' + str(predictions1) + '_' + str(
+                predictions2) + '_' + str(predictions3) + '.png')
 
             gen_img_deprocessed = deprocess_image(gen_img)
             orig_img_deprocessed = deprocess_image(orig_img)
@@ -173,4 +180,5 @@ for _ in xrange(args.seeds):
             imsave('./generated_inputs/' + args.transformation + '_' + str(predictions1) + '_' + str(
                 predictions2) + '_' + str(predictions3) + '_orig.png',
                    orig_img_deprocessed)
+            print()
             break

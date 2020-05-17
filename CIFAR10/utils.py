@@ -44,11 +44,11 @@ def constraint_black(gradients, rect_shape=(6, 6)):
 
 
 def constraint_rgb(gradients):
-    if constraint_rgb.prev_ch == -1:
-        constraint_rgb.prev_ch = np.argmax(np.sum(gradients, (1, 2)))
+    if constraint_rgb.channel == -1:
+        constraint_rgb.channel = np.argmax(np.sum(gradients, (1, 2)))
     new_grads = np.zeros_like(gradients)
-    new_grads[:,:,:,constraint_rgb.prev_ch] = 1
-    return new_grads * np.mean(gradients[:,:,:,constraint_rgb.prev_ch])
+    new_grads[:,:,:,constraint_rgb.channel] = 1
+    return new_grads * np.mean(gradients[:,:,:,constraint_rgb.channel])
 
 
 def init_coverage_tables(model1, model2, model3):
