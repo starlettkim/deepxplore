@@ -125,6 +125,7 @@ for _ in xrange(args.seeds):
     # this function returns the loss and grads given the input picture
     iterate = K.function([input_tensor], [loss1, loss2, loss3, loss1_neuron, loss2_neuron, loss3_neuron, grads])
 
+    # initialize RGB channel selection
     if args.transformation == 'rgb':
         constraint_rgb.channel = -1
 
@@ -140,7 +141,7 @@ for _ in xrange(args.seeds):
         elif args.transformation == 'blackout':
             grads_value = constraint_black(grads_value)  # constraint the gradients value
         elif args.transformation == 'rgb':
-            grads_value = constraint_rgb(grads_value)
+            grads_value = constraint_rgb(grads_value)  # constraint the gradents value
 
         gen_img += grads_value * args.step
         predictions1 = np.argmax(model1.predict(gen_img)[0])
@@ -162,7 +163,7 @@ for _ in xrange(args.seeds):
                 neuron_covered(model_layer_dict3)[
                     1])
             print(bcolors.OKGREEN + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
-            if args.transformation == 'rgb':
+            if args.transformation == 'rgb':  # print difference for RGB transformation
                 orig_mean = np.mean(orig_img, (0, 1, 2))[constraint_rgb.channel]
                 gen_mean = np.mean(gen_img, (0, 1, 2))[constraint_rgb.channel]
                 print(bcolors.OKGREEN + 'changed ' + ['red', 'green', 'blue'][constraint_rgb.channel] +

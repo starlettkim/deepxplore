@@ -45,11 +45,11 @@ def constraint_black(gradients, rect_shape=(6, 6)):
 
 def constraint_rgb(gradients):
     if constraint_rgb.channel == -1:
-        constraint_rgb.channel = np.argmax(np.abs(np.sum(gradients, (1, 2))))
+        constraint_rgb.channel = np.argmax(np.abs(np.sum(gradients, (1, 2))))  # select channel to transform
     new_grads = np.zeros_like(gradients)
-    new_grads[:,:,:,constraint_rgb.channel] = 1
+    new_grads[:,:,:,constraint_rgb.channel] = 1  # mask the channel
     grad_mean = np.mean(gradients[:,:,:,constraint_rgb.channel])
-    return new_grads * grad_mean
+    return new_grads * grad_mean  # mask 
 
 
 def init_coverage_tables(model1, model2, model3):
