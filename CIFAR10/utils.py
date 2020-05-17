@@ -10,7 +10,7 @@ from keras.models import Model
 def deprocess_image(x):
     x *= 255
     x = np.clip(x, 0, 255).astype('uint8')
-    return x.reshape(x.shape[1], x.shape[2])  # original shape (1,img_rows, img_cols,1)
+    return x.reshape((x.shape[1], x.shape[2], 3))  # original shape (1,img_rows, img_cols,3)
 
 
 def normalize(x):
@@ -41,32 +41,6 @@ def constraint_black(gradients, rect_shape=(6, 6)):
         new_grads[:, start_point[0]:start_point[0] + rect_shape[0],
         start_point[1]:start_point[1] + rect_shape[1]] = -np.ones_like(patch)
     return new_grads
-
-
-def constraint_adj(gradients, img):
-    new_mask = ori_mask = img > .5  # mask bright pixels
-
-    # shift mask down
-    shifted_mask = np.roll(ori_mask, 1, 1)
-    shifted_mask[:,0] = 0
-    new_mask += shifted_mask
-
-    # shift mask up
-    shifted_mask = np.roll(ori_mask, -1, 1)
-    shifted_mask[:,-1] = 0
-    new_mask += shifted_mask
-
-    # shift mask right
-    shifted_mask = np.roll(ori_mask, 1, 2)
-    shifted_mask[:,:,0] = 0
-    new_mask += shifted_mask
-
-    # shift mask left
-    shifted_mask = np.roll(ori_mask, -1, 2)
-    shifted_mask[:,:,-1] = 0
-    new_mask += shifted_mask
-
-    return gradients * shifted_mask
 
 
 def init_coverage_tables(model1, model2, model3):
@@ -125,7 +99,7 @@ def full_coverage(model_layer_dict):
 
 def scale(intermediate_layer_output, rmax=1, rmin=0):
     X_std = (intermediate_layer_output - intermediate_layer_output.min()) / (
-        intermediate_layer_output.max() - intermediate_layer_output.min())
+            intermediate_layer_output.max() - intermediate_layer_output.min())
     X_scaled = X_std * (rmax - rmin) + rmin
     return X_scaled
 

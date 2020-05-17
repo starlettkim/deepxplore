@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import argparse
 
-from keras.datasets import mnist
+from keras.datasets import cifar10
 from keras.layers import Input
 from scipy.misc import imsave
 
@@ -19,7 +19,7 @@ from utils import *
 # read the parameter
 # argument parsing
 parser = argparse.ArgumentParser(description='Main function for difference-inducing input generation in MNIST dataset')
-parser.add_argument('transformation', help="realistic transformation type", choices=['light', 'occl', 'blackout', 'adjacent'])
+parser.add_argument('transformation', help="realistic transformation type", choices=['light', 'occl', 'blackout', 'rgb'])
 parser.add_argument('weight_diff', help="weight hyperparm to control differential behavior", type=float)
 parser.add_argument('weight_nc', help="weight hyperparm to control neuron coverage", type=float)
 parser.add_argument('step', help="step size of gradient descent", type=float)
@@ -34,12 +34,12 @@ parser.add_argument('-occl_size', '--occlusion_size', help="occlusion size", def
 args = parser.parse_args()
 
 # input image dimensions
-img_rows, img_cols = 28, 28
+img_rows, img_cols = 32, 32
 # the data, shuffled and split between train and test sets
-(_, _), (x_test, _) = mnist.load_data()
+(_, _), (x_test, _) = cifar10.load_data()
 
-x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 1)
-input_shape = (img_rows, img_cols, 1)
+x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 3)
+input_shape = (img_rows, img_cols, 3)
 
 x_test = x_test.astype('float32')
 x_test /= 255
@@ -134,8 +134,6 @@ for _ in xrange(args.seeds):
                                           args.occlusion_size)  # constraint the gradients value
         elif args.transformation == 'blackout':
             grads_value = constraint_black(grads_value)  # constraint the gradients value
-        elif args.transformation == 'adjacent':
-            grads_value = constraint_adj(grads_value, gen_img)  # constraint the gradients value
 
         gen_img += grads_value * args.step
         predictions1 = np.argmax(model1.predict(gen_img)[0])
