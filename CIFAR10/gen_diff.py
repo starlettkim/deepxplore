@@ -65,6 +65,7 @@ for _ in xrange(args.seeds):
         model3.predict(gen_img)[0])
 
     if not label1 == label2 == label3:
+        '''
         print(bcolors.OKGREEN + 'input already causes different outputs: {}, {}, {}'.format(label1, label2,
                                                                                             label3) + bcolors.ENDC)
 
@@ -88,6 +89,7 @@ for _ in xrange(args.seeds):
         # save the result to disk
         imsave('./generated_inputs/' + 'already_differ_' + str(label1) + '_' + str(
             label2) + '_' + str(label3) + '.png', gen_img_deprocessed)
+        '''
         continue
 
     # if all label agrees
@@ -123,6 +125,9 @@ for _ in xrange(args.seeds):
     # this function returns the loss and grads given the input picture
     iterate = K.function([input_tensor], [loss1, loss2, loss3, loss1_neuron, loss2_neuron, loss3_neuron, grads])
 
+    if args.transformation == 'rgb':
+        constraint_rgb.prev_ch = -1
+
     # we run gradient ascent for 20 steps
     for iters in xrange(args.grad_iterations):
         loss_value1, loss_value2, loss_value3, loss_neuron1, loss_neuron2, loss_neuron3, grads_value = iterate(
@@ -134,6 +139,8 @@ for _ in xrange(args.seeds):
                                           args.occlusion_size)  # constraint the gradients value
         elif args.transformation == 'blackout':
             grads_value = constraint_black(grads_value)  # constraint the gradients value
+        elif args.transformation == 'rgb':
+            grads_value = constraint_rgb(grads_value)
 
         gen_img += grads_value * args.step
         predictions1 = np.argmax(model1.predict(gen_img)[0])
